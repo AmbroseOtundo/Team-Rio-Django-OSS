@@ -12,6 +12,15 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
+import environ
+
+
+# load environment variables
+env_path = os.path.abspath(os.path.dirname("env"))
+env = environ.Env()
+environ.Env.read_env(
+    os.path.join(env_path, ".env")
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,16 +57,18 @@ INSTALLED_APPS = [
     'django_filters', 
     # for blacklisting used refresh token
     'rest_framework_simplejwt.token_blacklist',
-    
     #Adding a richtext editor
     'ckeditor',
-    'ckeditor_uploader'
+    'ckeditor_uploader', 
 
+    # cors
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -91,8 +102,12 @@ WSGI_APPLICATION = 'CMS.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+       "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": env("DATABASE_DB"),
+        "USER": env("DATABASE_USER"),
+        "PASSWORD": env("DATABASE_PASSWORD"),
+        "HOST": env("DATABASE_HOST"),
+        "PORT": env("DATABASE_PORT"),
     }
 }
 
@@ -222,3 +237,12 @@ CKEDITOR_CONFIGS = {
     }, 
     
 }
+
+
+# cors configurations
+CORS_ALLOW_ALL_ORIGINS = True
+
+# minimum user's password length during registration
+USER_PASSWORD_LENGTH = 8
+
+
